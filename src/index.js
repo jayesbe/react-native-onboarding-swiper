@@ -4,6 +4,7 @@ import {
   FlatList,
   StatusBar,
   SafeAreaView,
+  ViewPropTypes,
 } from 'react-native';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
@@ -20,24 +21,32 @@ import DoneButton from './buttons/DoneButton';
 const itemVisibleHotfix = { itemVisiblePercentThreshold: 100 };
 
 class Onboarding extends Component {
-  constructor() {
-    super();
 
-    this.state = {
-      currentPage: 0,
-      previousPage: null,
-      width: null,
-      height: null,
-      backgroundColorAnim: new Animated.Value(0),
-      gone: false,
-    };
+  state = {
+    currentPage: 0,
+    previousPage: null,
+    width: null,
+    height: null,
+    backgroundColorAnim: new Animated.Value(0),
+    gone: false,
   }
-
-  componentDidUpdate() {
+  
+  componentWillUpdate(nextProps, nextState) {
+    if (nextState.currentPage !== this.state.currentPage) {
+      this.props.onPageAboutToChange({ currentPage: this.state.currentPage, nextPage: nextState.currentPage });
+    }
+  }
+  
+  componentDidUpdate(prevProps, prevState) {
+    
     Animated.timing(this.state.backgroundColorAnim, {
       toValue: 1,
-      duration: 500,
+      duration: 150,
     }).start();
+    
+    if (prevState.currentPage !== this.state.currentPage) {
+      this.props.onPageChanged({ currentPage: this.state.currentPage, previousPage: prevState.currentPage });
+    }
   }
 
   onSwipePageChange = ({ viewableItems }) => {
@@ -51,21 +60,21 @@ class Onboarding extends Component {
         backgroundColorAnim: new Animated.Value(0),
       };
     });
-  };
+  }
 
   goNext = () => {
     this.flatList.scrollToIndex({
       animated: true,
       index: this.state.currentPage + 1,
     });
-  };
-
+  }
+  
   _onLayout = () => {
     const { width, height } = Dimensions.get('window');
     this.setState({ width, height });
-  };
+  }
 
-  keyExtractor = (item, index) => index.toString();
+  keyExtractor = (item, index) => index.toString()
 
   renderItem = ({ item }) => {
     const {
@@ -74,6 +83,7 @@ class Onboarding extends Component {
       subtitle,
       backgroundColor,
       imageContainerStyles,
+      pageContainerStyles,
     } = item;
     const isLight = tinycolor(backgroundColor).getBrightness() > 180;
 
@@ -86,15 +96,17 @@ class Onboarding extends Component {
         width={this.state.width || Dimensions.get('window').width}
         height={this.state.height || Dimensions.get('window').height}
         imageContainerStyles={imageContainerStyles}
+        pageContainerStyles={pageContainerStyles}
       />
     );
-  };
+  }
 
   render() {
     const {
       pages,
       alterBottomColor,
       bottomBarHeight,
+      bottomBarStyles,
       controlStatusBar,
       showSkip,
       showNext,
@@ -160,7 +172,7 @@ class Onboarding extends Component {
           }
           {...flatlistProps}
         />
-        <SafeAreaView style={bottomBarHighlight ? styles.overlay : {}}>
+        <SafeAreaView style={[bottomBarHighlight ? styles.overlay : {}, bottomBarStyles]}>
           <Pagination
             gone={() => this.setState({ gone: true })}
             isLight={isLight}
@@ -202,11 +214,14 @@ Onboarding.propTypes = {
   ).isRequired,
   bottomBarHighlight: PropTypes.bool,
   bottomBarHeight: PropTypes.number,
+  bottomBarStyles: ViewPropTypes.style,
   showSkip: PropTypes.bool,
   showNext: PropTypes.bool,
   showDone: PropTypes.bool,
   onSkip: PropTypes.func,
   onDone: PropTypes.func,
+  onPageAboutToChange: PropTypes.func,
+  onPageChanged: PropTypes.func,
   skipLabel: PropTypes.oneOfType([PropTypes.element, PropTypes.string]),
   nextLabel: PropTypes.oneOfType([PropTypes.element, PropTypes.string]),
   SkipButtonComponent: PropTypes.oneOfType([PropTypes.element, PropTypes.func]),
@@ -218,6 +233,7 @@ Onboarding.propTypes = {
 Onboarding.defaultProps = {
   bottomBarHighlight: true,
   bottomBarHeight: 60,
+  bottomBarStyles: {},
   controlStatusBar: true,
   showSkip: true,
   showNext: true,
@@ -226,6 +242,8 @@ Onboarding.defaultProps = {
   nextLabel: 'Next',
   onSkip: null,
   onDone: null,
+  onPageAboutToChange: () => null,
+  onPageChanged: () => null,
   SkipButtonComponent: SkipButton,
   DoneButtonComponent: DoneButton,
   NextButtonComponent: NextButton,

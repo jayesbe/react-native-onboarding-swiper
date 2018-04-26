@@ -10,6 +10,7 @@ const Page = ({
   width,
   height,
   imageContainerStyles,
+  pageContainerStyles,
 }) => {
   let titleElement = title;
   if (typeof title === 'string' || title instanceof String) {
@@ -34,7 +35,7 @@ const Page = ({
   }
 
   return (
-    <View style={[styles.container, { width, height }]}>
+    <View style={[styles.container, pageContainerStyles, { width, height }]}>
       <View style={[styles.imageContainer, imageContainerStyles]}>{image}</View>
       {titleElement}
       {subtitleElement}
@@ -46,6 +47,7 @@ Page.propTypes = {
   isLight: PropTypes.bool.isRequired,
   image: PropTypes.element.isRequired,
   imageContainerStyles: ViewPropTypes.style,
+  pageContainerStyles: ViewPropTypes.style,
   title: PropTypes.oneOfType([PropTypes.string, PropTypes.element]).isRequired,
   subtitle: PropTypes.oneOfType([PropTypes.string, PropTypes.element])
     .isRequired,
@@ -54,7 +56,8 @@ Page.propTypes = {
 };
 
 Page.defaultProps = {
-  imageContainerStyles: null,
+  imageContainerStyles: {},
+  pageContainerStyles: {},
 };
 
 const { width, height } = Dimensions.get('window');
@@ -66,11 +69,11 @@ const styles = {
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: potrait ? 'center' : 'flex-start',
-    paddingTop: potrait ? 0 : 10,
+    // paddingTop: potrait ? 0 : 10,
   },
   imageContainer: {
     flex: 0,
-    paddingBottom: potrait ? 60 : 10,
+    // paddingBottom: potrait ? 60 : 10,
     alignItems: 'center',
     width: '100%',
   },

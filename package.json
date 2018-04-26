@@ -49,6 +49,9 @@
     "react-native": "*",
     "prop-types": "*"
   },
+  "resolutions": {
+    "uglify-es": "3.3.4"
+  },
   "prettier": {
     "singleQuote": true,
     "trailingComma": "es5"
